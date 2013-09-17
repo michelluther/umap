@@ -1,0 +1,44 @@
+[comment encoding = UTF-8 /]
+[module main('http://www.eclipse.org/uml2/3.0.0/UML')/]
+[import com::tts::umap::services::abapServices /]
+[import com::tts::umap::nuggetExport::generateClass /]
+[import com::tts::umap::nuggetExport::generateInterface /]
+[import com::tts::umap::nuggetExport::generateExceptionClass /]
+[import com::tts::umap::nuggetExport::createBaseException /]
+
+
+
+
+[template public main(p : Package)]
+	
+	[comment @main /]
+	[file (p.name.toUpper().concat('.nugg'), false, 'UTF-8')]
+	<?xml version="1.0" encoding="iso-8859-1"?>
+	<nugget name="[p.name.toUpper()/]">
+	[comment We have to define a special Flow of creation
+			 1) BaseException
+			 2) Exceptions
+			 3) Interfaces
+			 4) Classes 
+			 very ugly, there must be a better way via OCL..../]
+	 [for (c : Class | p.ownedElement->select(oclIsKindOf(Class)))]
+	 	[generateBaseException(c)/]
+	 [/for]
+	 [for (c : Class | p.ownedElement->select(oclIsKindOf(Class)))]
+	 	[generateExceptionClass(c)/]
+	 [/for]
+	 [for (inf : Interface | p.ownedElement->select(oclIsKindOf(Interface)))]
+	 	[generateInterface(inf)/]
+	 [/for]	
+	 [for (c : Class | p.ownedElement->select(oclIsKindOf(Class)))]
+	 [ comment  hier prüfen ob nicht baseexception oder exception  /]
+	 [if not isBaseException(c) or not isException(c)]
+	 	[generateClass(c)/]
+	 [/if]
+	 	
+	 
+	 [/for]
+	 </nugget>
+	[/file]	
+[/template]
+

@@ -1,0 +1,34 @@
+[comment encoding = UTF-8 /]
+[module generateInterfaceUMAP('http://www.eclipse.org/uml2/3.0.0/UML')/]
+[import com::tts::umap::umapExport::generateClassUMAP /]
+
+
+[template public generateInterfaceDefinition(i : Interface)post (trim())]
+<definition>
+interface [i.name/].
+</definition>
+	[createSuperInterfaces(i)/]
+	[createAttributes(i, VisibilityKind::public)/]
+	[createInterfaceOperations(i)/]
+<endDefinition>
+endinterface.
+</endDefinition>	
+[/template]
+
+[comment  Erzeugt die Methoden Signatur/]
+[template public createInterfaceOperations(intf : Interface) post (trim())]
+	[for (operation : Operation | intf.ownedOperation)]
+	<method>
+		[createMethodSourceDefinition(operation).toString().trim()/].
+	</method>
+	[/for]
+[/template]
+
+[comment Für geschachtelte Interfaces, bestimmt die includierten interfaces  /]
+[template public createSuperInterfaces(intf : Interface) ? (intf.general->isEmpty() <> true) post (trim())]
+[for (superIntf : Interface | intf.general)]
+<superInterfaces>
+interfaces [superIntf.name/].
+</superInterfaces>
+[/for]	
+[/template]

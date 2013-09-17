@@ -1,0 +1,166 @@
+[comment encoding = UTF-8 /]
+[module generateClassUMAP('http://www.eclipse.org/uml2/3.0.0/UML')/]
+[import com::tts::umap::services::abapServices /]
+[comment [import com::tts::umap::nuggetExport::generateClass  /]
+
+
+[comment This generates an abap local class which can be imported into the SAP System  /]
+[template public generateClassDefinition(c : Class) post (self.trim())]
+<definition>
+class [c.name/] definition [if (c.superClass->notEmpty())] 
+INHERITING FROM [c.superClass.name.toUpper()/][/if]
+[if (c.isAbstract)] 
+abstract 
+[/if].
+</definition>
+<publicSection>
+public section.
+[createInterfacesSource(c).toString().trim()/]
+[createAttributes(c, VisibilityKind::public).toString().trim()/]
+[createMethodDefinition(c, VisibilityKind::public).toString().trim()/]
+</publicSection>
+<protectedSection>
+protected section.
+[createAttributes(c, VisibilityKind::protected).toString().trim()/]
+[createMethodDefinition(c, VisibilityKind::protected).toString().trim()/]
+</protectedSection>
+<privateSection>
+private section.
+[createAttributes(c, VisibilityKind::private).toString().trim()/]
+[createMethodDefinition(c, VisibilityKind::private).toString().trim()/]
+</privateSection>
+<endDefinition>
+endclass.
+</endDefinition>
+[/template]
+
+[template public generateClassImplementation(c : Class) post (trim())]
+class [c.name/] implementation.
+[createInterfaceImplementations(c).toString().trim()/]
+[createMethodImplementations(c).toString().trim()/]
+endclass.
+[/template]
+
+[template public createMethodImplementations(c : Class)]
+[for (operation : Operation | c.ownedOperation)]
+[if (operation.isAbstract = false)]
+method [operation.name/].
+endmethod.
+[/if]
+
+[/for]
+[/template]
+
+[template public createInterfaceImplementations(c : Class) post (self.trim())]
+[for (intf : Interface | c.interfaceRealization.target)]
+[for (operation : Operation | intf.ownedOperation)]
+method [intf.name/]~[operation.name/].
+endmethod.
+[/for]		
+[createInterfaceImplementations(intf)/]
+[/for]
+[/template]
+
+[template public createInterfaceImplementations(intf : Interface) post (self.trim())]
+[for (superIntf : Interface | intf.general)]
+[for (operation : Operation | superIntf.ownedOperation)]
+method [superIntf.name/]~[operation.name/].
+endmethod.
+[/for]
+[createInterfaceImplementations(superIntf)/]		
+[/for]	
+[/template]
+
+[template private createMethodDefinition(c : Class, visibility : VisibilityKind) post (trim())]
+[for (operation : Operation | getOperationByVisibility(c, visibility))]
+<method description="[operation.ownedComment._body/]">
+[createMethodSourceDefinition(operation).toString().trim()/].
+</method>
+[/for]
+[/template]
+
+
+[comment  creates attributes according to their visibility/]
+[template public createAttributes(c : Classifier, visibility : VisibilityKind) post (trim())]
+	[for (att : Property | getAttributeByVisibility(c, visibility))]
+	<attribute description="[att.ownedComment._body/]">
+	[if (att.isStatic)]class-[/if]data [if (att.association.name.oclIsInvalid() = false) ] [att.association.name/] [/if]
+[if (att.association.name.oclIsInvalid() = true) ] [att.name.toUpper()/][/if] type [if ((isAbapRef(att)) or (isReference(att)) )] ref to [/if] [att.type.name.toUpper()/][if (isReadOnly(att) and (att.visibility = VisibilityKind::public))] read-only[/if].
+	</attribute>	
+	[/for]	
+[/template]
+
+[comment]
+[template public createAttributes(c : Classifier, visibility : VisibilityKind) post (trim())]
+	[for (att : Property | getAttributeByVisibility(c, visibility))]
+	<attribute>
+	[if (att.isStatic)]class-[/if]data [att.name.toUpper()/] type [if ((isAbapRef(att)) or (isReference(att)) )] ref to [/if] [att.type.name.toUpper()/][if (isReadOnly(att))] read-only[/if].
+	</attribute>	
+	[/for]	
+	
+[/template]/]
+[/comment]
+
+[template public createInterfacesSource(c : Class) post (trim())]
+	[for (intf : Interface | c.interfaceRealization.target)]
+	<interface>
+	interfaces [intf.name.toUpper()/].
+	</interface>	
+	[/for]
+[/template]
+
+[template public createMethodSourceDefinition(op : Operation) post (trim())]
+	[if (op.isStatic)]
+	class-[/if]methods [op.name.toUpper()/] [if (op.isAbstract)]abstract [/if] [createMethodSignature(op)/] 
+[/template]
+
+[template public createMethodSignature(operation : Operation) post (trim())]
+[if ( hasDirection(operation, 'in'))]
+	importing [getImportingParameter(operation.ownedParameter)/]
+[/if]
+[if (hasDirection(operation, 'out'))]
+	exporting [getExportingParameter(operation.ownedParameter)/]	
+[/if]
+[if (hasDirection(operation, 'inout'))]
+	changing [getChangingParameter(operation.ownedParameter)/]	
+[/if]
+[if (hasDirection(operation, 'return'))]
+	returning value(r_return) type [getReturningParameter(operation.ownedParameter)/]	
+[/if]  
+[if (operation.raisedException->notEmpty())]
+	raising
+[for (e : Class | operation.raisedException)]
+	[e.name.toUpper()/]
+[/for]
+[/if]	
+[/template]
+
+[comment  Returns the importing Parameter Source/]
+[template public getImportingParameter(paa : Set(Parameter)) post (trim())]
+	[for (pa : Parameter | getParameterByDirection(paa, 'in'))]
+		![pa.name/] type [if (isAbapRef(pa))] ref to [/if][pa.type.name.toUpper()/] [if (pa.getDefault().trim() <> '')]default [pa.getDefault().trim()/] [/if]
+[if ((pa.lower = 0) and (pa.getDefault().trim() = '')) ] optional[/if]
+	[/for]
+[/template]
+
+[comment  Returns the exporting Parameter Source/]
+[template public getExportingParameter(paa : Set(Parameter))post (trim())]
+	[for (pa : Parameter | getParameterByDirection(paa, 'out'))]
+		![pa.name/] type [if (isAbapRef(pa))] ref to [/if][pa.type.name.toUpper()/]
+	[/for]
+[/template]
+
+[comment  Returns the changing Parameter Source/]
+[template public getChangingParameter(paa : Set(Parameter))post (trim())]
+	[for (pa : Parameter | getParameterByDirection(paa, 'inout'))]
+		![pa.name/] type [if (isAbapRef(pa))] ref to [/if][pa.type.name.toUpper()/][if (pa.getDefault().trim() <> '')]default [pa.getDefault().trim()/] [/if]
+[if ((pa.lower = 0) and (pa.getDefault().trim() = '')) ] optional[/if]
+	[/for]
+[/template]
+
+[comment  Returns the retunrning Parameter Source/]
+[template public getReturningParameter(paa : Set(Parameter))post (trim())]
+	[for (pa : Parameter | getParameterByDirection(paa, 'return'))]
+		[if (isAbapRef(pa))] ref to [/if] [pa.type.name.toUpper()/]	
+	[/for]
+[/template]

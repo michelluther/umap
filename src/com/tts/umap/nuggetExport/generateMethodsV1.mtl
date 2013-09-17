@@ -1,0 +1,136 @@
+[comment encoding = UTF-8 /]
+[module generateMethodsV1('http://www.eclipse.org/uml2/3.0.0/UML')/]
+[import com::tts::umap::services::abapServices /]
+
+[comment This Template generates the Method Definitions as XML Tags. These are basically the Values 
+		 which will be stored and used in the SAP System. Generating only the Sources is not enough for 
+		 Global Abap Classes. SE34/SE80 needs these values as well. /]
+[template public generateMethods(opp: OrderedSet(Operation)) post (trim())]
+[comment][for (op : Operation | c.ownedOperation)][/comment]
+[for (op : Operation | opp)]
+	<method CLSNAME="[owningObject(op)/]" CMPNAME="[op.name.toUpper()/]" VERSION="1" LANGU="[getLangu('bla')/]" EXPOSURE="[getAbapVisibility(op.visibility.toString())/]" STATE="1" EDITORDER="[i/]" DISPID="0 " AUTHOR="[getAuthor('bla')/]" CREATEDON="[getDate('bla')/]" CHANGEDON="00000000" MTDTYPE="0" MTDDECLTYP="[if (op.isStatic)]1[else]0[/if]" R3RELEASE="[getRelease('bla')/]" BCMTDCAT="00" BCMTDSYN="0">
+		[for (pa : Parameter | op.ownedParameter)]
+			<[createParameter(pa, i)/]/>
+		[/for]
+		[for (cl : Classifier | op.raisedException)]
+			<[createException(op, cl.name.toUpper(), i)/]/>
+		[/for]		
+[generateMethodSource(op)/]	
+	</method>
+[/for]
+[/template]
+
+[template public createExceptionConstructor(name : String)]
+   <method CLSNAME="[name.toUpper()/]" CMPNAME="CONSTRUCTOR" VERSION="1" LANGU="D" DESCRIPT="CONSTRUCTOR" EXPOSURE="2" STATE="1" EDITORDER="1 " DISPID="0 " AUTHOR="[getAuthor('bla')/]" CREATEDON="[getDate('bla')/]" CHANGEDON="00000000" MTDTYPE="2" MTDDECLTYP="0" LOCKED="X" R3RELEASE="[getRelease('bla')/]" BCMTDCAT="00" BCMTDSYN="0">
+   <parameter CLSNAME="[name.toUpper()/]" CMPNAME="CONSTRUCTOR" SCONAME="TEXTID" VERSION="1" LANGU="[getLangu('bla')/]" CMPTYPE="1" MTDTYPE="2" EDITORDER="1 " DISPID="0 " AUTHOR="[getAuthor('bla')/]" CREATEDON="[getDate('bla')/]" CHANGEDON="00000000" PARDECLTYP="0" PARPASSTYP="1" TYPTYPE="0" TYPE="TEXTID" PAROPTIONL="X"/>
+   <parameter CLSNAME="[name.toUpper()/]" CMPNAME="CONSTRUCTOR" SCONAME="PREVIOUS" VERSION="1" LANGU="[getLangu('bla')/]" CMPTYPE="1" MTDTYPE="2" EDITORDER="2 " DISPID="0 " AUTHOR="[getAuthor('bla')/]" CREATEDON="[getDate('bla')/]" CHANGEDON="00000000" PARDECLTYP="0" PARPASSTYP="1" TYPTYPE="0" TYPE="PREVIOUS" PAROPTIONL="X"/>
+   <source></source>
+  </method>
+[/template]
+
+[template public createParameter (pa : Parameter, count : Integer) ? (not pa.isException) post (trim()) ]
+parameter
+   [comment Class name/]
+   CLSNAME="[owningObject(pa.operation)/]"
+   [comment Method name/] 
+   CMPNAME="[pa.operation.name.toUpper()/]"
+   [comment Parameter name In case it is a returning value we have to set the name by our self/] 
+   SCONAME="[if ((pa.direction.toString() = 'return'))]R_RETURN [else][pa.name.toUpper()/][/if]"
+   [comment We generate new stuff so Verion is always 1/] 
+   VERSION="1" 
+   [comment Language from property file /]
+   LANGU="[getLangu('bla')/]" 
+   [comment ? /]			   
+   CMPTYPE="1"
+   [comment ? /] 
+   MTDTYPE="0" 
+   [comment Display ordernumber for SE24/80 Editor /]
+   EDITORDER="[count/]"
+   [comment ? /] 
+   DISPID="0 " 
+   [comment Author from property file/]
+   AUTHOR="[getAuthor('bla')/]"
+   [comment :-) Date from property file/] 
+   CREATEDON="[getDate('bla')/]"
+   [comment This we don't need /] 
+   CHANGEDON="00000000"
+   [comment]
+   This is the value for importing = 0 := parameter direction = in
+   						 exporting = 1
+   						 changing  = 2
+   						 returning = 3 := parameter direction = return
+   use an enumeration?
+   Yet only importing and returning are supported  
+   [/comment]
+   PARDECLTYP="[getParameterDirection(pa)/]" 
+   [comment Pass by Value/Reference 
+   			Yet only returning parameters get the flag pass by value because they need it/]
+   PARPASSTYP="[if (pa.direction.toString() = 'return')]0[else]1[/if]" 
+   [comment Type/Type Ref to 
+            Yet only classes and datatypes defined as classes are regarded as reference/]
+   TYPTYPE="[if (isAbapRef(pa))]3[else]1[/if]"
+   [comment dataelement /]
+   TYPE="[pa.type.name.toUpper()/]"
+   [comment is parameter optional /]
+   PAROPTIONL="[if (pa.lower = 0)]X[/if]"
+[/template]
+
+[comment deprecated /]
+[template public deprecatedCreateException(op : Operation, count : Integer) post (trim())]
+exception 
+CLSNAME="[owningObject(op)/]" 
+CMPNAME="[op.name.toUpper()/]" 
+SCONAME="[op.raisedException.name.toUpper()/]"
+VERSION="1" 
+LANGU="[getLangu('bla')/]" 
+DESCRIPT="Dummy please replace" 
+MTDTYPE="0" 
+EDITORDER="[count/]" 
+AUTHOR="[getAuthor('bla')/]" 
+CREATEDON="[getDate('bla')/]" 
+CHANGEDON="00000000"	
+[/template]
+
+[template public createException(op : Operation, name : String,  count : Integer) post (trim())]
+exception 
+CLSNAME="[owningObject(op)/]" 
+CMPNAME="[op.name.toUpper()/]" 
+SCONAME="[name.toUpper()/]"
+VERSION="1" 
+LANGU="[getLangu('bla')/]" 
+DESCRIPT="Dummy please replace" 
+MTDTYPE="0" 
+EDITORDER="[count/]" 
+AUTHOR="[getAuthor('bla')/]" 
+CREATEDON="[getDate('bla')/]" 
+CHANGEDON="00000000"	
+[/template]
+
+
+[comment  Returns if Operation belongs to an Instance of a Class or an Interface
+		  in case it belogs to an Interface generation we don't have to generate 
+		  Method Sources for example/]
+[template public owningObject (op : Operation) post (trim())]
+[if (op.owner.oclIsKindOf(Class))]
+[op.class.name.toUpper()/]
+[elseif (op.owner.oclIsKindOf(Interface))]
+[op.interface.name.toUpper()/]
+[/if]
+[/template]
+
+[comment  Create Method Source Stub has guarding condition that operation musst belog to a class/]
+[template private generateMethodSource (op : Operation) ? (op.owner.oclIsKindOf(Class)) post (trim()) ]
+		<source>	
+			method [op.name.toUpper()/] . 
+			[comment somehow endmethod is not needed SAPLINK generates it.. /]			
+		</source>	
+[/template]
+
+[comment  Returns the Abap values for Parameterdirection/]
+[template public getParameterDirection(pa : Parameter) post (trim())]
+[if (pa.direction.toString() = 'in')]0
+[elseif (pa.direction.toString() = 'inout')]2
+[elseif (pa.direction.toString() = 'out')]1
+[elseif (pa.direction.toString() = 'return')]3
+[/if]
+[/template]

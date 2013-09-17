@@ -1,0 +1,88 @@
+[module abapServices('http://www.eclipse.org/uml2/3.0.0/UML')/]
+ 
+[comment deprecated /]
+[query public getUUID(arg0 : String) : String
+	= invoke('com.tts.umap.services.AbapService', 'getUUID(java.lang.String)', Sequence{arg0}) /]
+[comment deprecated /]
+[query public getAuthor(arg0 : String) : String
+	= invoke('com.tts.umap.services.AbapService', 'getAuthor(java.lang.String)', Sequence{arg0}) /]
+[comment deprecated /]
+[query public getLangu(arg0 : String) : String
+	= invoke('com.tts.umap.services.AbapService', 'getLangu(java.lang.String)', Sequence{arg0}) /]
+[comment deprecated /]
+[query public getRelease(arg0 : String) : String
+	= invoke('com.tts.umap.services.AbapService', 'getRelease(java.lang.String)', Sequence{arg0}) /]
+		
+[query public getPublicAtt(c : Class) : Set(Property)
+	 = c.attribute->select(visibility = VisibilityKind::public)/]
+
+[query public getPublicOp(c : Class) : Set(Operation) 
+	 = c.ownedOperation->select(visibility = VisibilityKind::public)/]
+
+[query public getPrivateAtt(c : Class) : Set(Property) 
+	 = c.attribute->select(visibility = VisibilityKind::private)/]	
+
+[query public getPrivateOp(c : Class) : Set(Operation) 
+	 = c.ownedOperation->select(visibility = VisibilityKind::private)/]	
+
+[comment deprecated /]
+[query public getDate(arg0 : String) : String
+	= invoke('com.tts.umap.services.AbapService', 'getDate(java.lang.String)', Sequence{arg0}) /]
+[comment deprecated /]
+[query public getNuggetName(arg0 : String) : String
+	= invoke('com.tts.umap.services.AbapService', 'getNuggetName(java.lang.String)', Sequence{arg0}) /]
+
+[query public getAttributeByVisibility(c : Classifier, v : VisibilityKind) : Set(Property)
+	 = c.attribute->select(visibility = v)/]
+	 
+[query public getOperationByVisibility(c : Class, v : VisibilityKind) : Set(Operation) 
+	 = c.ownedOperation->select(visibility = v)/]	
+	 	 	 
+[query public isAbapRef(att : Property) : Boolean
+	 = att.type.oclIsKindOf(uml::Class)/]
+	 
+[query public isReference(pr : Property) : Boolean
+	= pr.association->notEmpty()/]
+	 
+	 
+[query public isAbapRef(pa : Parameter) : Boolean
+	 = (pa.type.oclIsKindOf(uml::Class) or pa.type.oclIsKindOf(uml::Interface))/]
+	 
+[comment pass VisibilityKind/]
+[query public getAbapVisibility(visibility : String) : Integer
+	= invoke('com.tts.umap.services.AbapService', 'getAbapVisibility(java.lang.String)', Sequence{visibility}) /]	 
+
+[comment  nasty hack cause ParameterDirectionKind::in isn#t working.. use underscore befor in :::_in/]
+[query public hasDirection(op : Operation, direct : String) : Boolean
+    = 	op.ownedParameter->exists(direction.toString().equalsIgnoreCase(direct))/]
+   
+[query public getParameterByDirection(pa : Set(Parameter), direct : String) : Set(Parameter) 
+	= pa->select(direction.toString().equalsIgnoreCase(direct))/]
+
+[query public hasAllowedParameterCombination(c : Class) : Boolean
+	= invoke('com.tts.umap.services.AbapService', 'hasAllowedParameterCombination(org.eclipse.uml2.uml.Class)', Sequence{c}) /]
+	
+[query public hasAllowedParameterCombination(i : Interface) : Boolean
+	= invoke('com.tts.umap.services.AbapService', 'hasAllowedParameterCombination(org.eclipse.uml2.uml.Class)', Sequence{i}) /]
+[comment deprecated /]			
+[query public isBaseException(c : Class) : Boolean
+	= c.getAppliedStereotypes()->exists(name = 'baseException')/]
+
+[query public isException(c : Class) : Boolean
+	= c.getAppliedStereotypes()->exists(name = 'exception')/]
+
+[query public isValid(c : Class) : Boolean
+	= invoke('com.tts.umap.services.AbapService', 'isValid(org.eclipse.uml2.uml.Class)', Sequence{c}) /]
+
+[query public isValid(i: Interface) : Boolean
+	= invoke('com.tts.umap.services.AbapService', 'isValid(org.eclipse.uml2.uml.Interface)', Sequence{i}) /]
+
+[query public isReadOnly(pr : Property) : Boolean 
+	= (pr.getAppliedStereotypes()->exists(name = 'readOnly') or pr.isReadOnly) /]
+
+[query public setDescription(c : Classifier) : String 
+	= invoke('com.tts.umap.services.AbapService', 'setDescription(org.eclipse.uml2.uml.Classifier)', Sequence{c}) /]
+[comment deprecated /]
+[query public testMeth() : String
+	= invoke('com.tts.umap.services.AbapService', 'testMeth()', Sequence{}) /]
+	
