@@ -9,24 +9,27 @@
 [comment First precheck if Parameter Combination is allowed otherwise inform the User /]
 
 [comment @main /]
+[if (p.ownedElement->exists(oclIsTypeOf(Interface)) = true or p.ownedElement->exists(oclIsTypeOf(Class)) = true)]
 [file (p.name.concat('.umap'), false, 'UTF-8')]
 <?xml version="1.0" encoding="UTF-8"?>
 <umap name="[p.name/]">
 <objects>
-[for (int : Interface | self.ownedElement->filter(Interface))]
-	<object name="[int.name/]" type="I">
+[for (int : Interface | p.ownedElement->filter(Interface))]
+	<object name="[int.name/]" type="I" description="[int.ownedComment._body/]">
 	[generateInterfaceDefinition(int).toString().trim()/]
 	</object>
 [/for]
-
 [for (c : Class | p.ownedElement->filter(Class))]
+[if (isValid(c))]
 	<object name="[c.name/]" type="C" isException="[isException(c)/]" description="[c.ownedComment._body/]">
 	[generateClassDefinition(c).toString().trim()/]
 	</object>
+[/if]
+
  [/for] 
 </objects>
-</umap> 
+</umap>
 [/file]
-	
+[/if]	
 [/template]
 

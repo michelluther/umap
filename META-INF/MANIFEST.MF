@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: UML2ABAP
 Bundle-SymbolicName: com.tts.umap;singleton:=true
-Bundle-Version: 0.1.9.alpha
+Bundle-Version: 0.9.1.beta
 Bundle-Activator: com.tts.umap.Activator
 Bundle-Vendor: Mathias Maerker
 Require-Bundle: org.eclipse.core.runtime,

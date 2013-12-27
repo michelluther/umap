@@ -6,9 +6,11 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Plugin;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.uml2.uml.Class;
 import org.eclipse.uml2.uml.Classifier;
@@ -28,7 +30,6 @@ public class AbapService {
 	
 	private String getPref(String key){
 		String a = Platform.getPreferencesService().getString("com.tts.umap.ui", key , null, null );
-		System.out.println("test: " + a );
 		return a;
 	}
 	public String testMeth() {
@@ -99,6 +100,7 @@ public class AbapService {
 	 *            pass public, private or protected
 	 * @return public = 2 private = 0 protected = 1
 	 */
+	@Deprecated
 	public int getAbapVisibility(String visibility) {
 		if (visibility.toLowerCase().equals(Messages.AbapPublic)) {
 			return 2;
@@ -120,10 +122,10 @@ public class AbapService {
 			if ((list.contains(Messages.AbapDirectionChanging) || list
 					.contains(Messages.AbapDirectionExporting))
 					&& list.contains(Messages.AbapDirectionReturn)) {
-				// getLogger().info("start");
-				// getLogger().log(Level.SEVERE,
-				// "Parameter Combination not allowed", op.getName());
-				// getLogger().fine("END");
+//				 getLogger().info("start");
+//				 getLogger().log(Level.SEVERE,
+//				 "Parameter Combination not allowed", op.getName());
+//				 getLogger().fine("END");
 				return false;
 			}
 			// list.clear();
@@ -141,26 +143,28 @@ public class AbapService {
 	 * @return true all checks where passed
 	 */
 	public boolean isValid(Class c) {
-//		if (getPref("booleanPreference").equals(true)) {
-//			// getLogger().info("Start Logging");
-//			if ((c.getAppliedStereotype("extensions::exception") != null)
-//					|| (c.getAppliedStereotype("extensions::baseException") != null)) {
-//				if (!c.getName().toUpperCase()
-//						.startsWith(getPref("exceptionAbbreviation").toUpperCase())) {
-//					return false;
-//				}
-//			} else {
-//				if (!c.getName().toUpperCase()
-//						.startsWith(getPref("classAbbreviation").toUpperCase())) {
-//					return false;
-//				}
-//			}
-//			if (c.getName().length() > Integer
-//					.parseInt(Messages.classNameLenght))
-//				return false;
-//			if (hasAllowedParameterCombination(c) == false)
-//				return false;
-//		}
+		if (getPref("booleanPreference").equals(true)) {
+//			 getLogger().info("Start Logging");
+//			 getLogger().log(Level.WARNING, "Test Log file");
+//			 getLogger().fine("End");
+			if ((c.getAppliedStereotype("extensions::exception") != null)
+					|| (c.getAppliedStereotype("extensions::baseException") != null)) {
+				if (!c.getName().toUpperCase()
+						.startsWith(getPref("exceptionAbbreviation").toUpperCase())) {
+					return false;
+				}
+			} else {
+				if (!c.getName().toUpperCase()
+						.startsWith(getPref("classAbbreviation").toUpperCase())) {
+					return false;
+				}
+			}
+			if (c.getName().length() > Integer
+					.parseInt(Messages.classNameLenght))
+				return false;
+			if (hasAllowedParameterCombination(c) == false)
+				return false;
+		}
 		return true;
 	}
 
@@ -208,10 +212,11 @@ public class AbapService {
 	@SuppressWarnings("unused")
 	private static Logger getLogger() {
 		if (logger == null)
-			logger = Logger.getLogger("com.tts.umap");
+			logger = Logger.getLogger(AbapService.class.getName());	
+		
 		if (fh == null) {
 			try {
-				fh = new FileHandler("c:/mylog.txt");
+				fh = new FileHandler("mylog.txt");
 				logger.addHandler(fh);
 			} catch (SecurityException e) {
 				return null;
@@ -222,7 +227,7 @@ public class AbapService {
 		return logger;
 
 	}
-
+@Deprecated
 	public String setDescription(Classifier c) {
 		EList<Comment> comment = c.getOwnedComments();
 		if (!comment.isEmpty()) {
