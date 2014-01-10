@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: UML2ABAP
-Bundle-SymbolicName: com.tts.umap;singleton:=true
-Bundle-Version: 0.9.1.beta
-Bundle-Activator: com.tts.umap.Activator
-Bundle-Vendor: Mathias Maerker
+Bundle-Name: Uml to Abap Codegenerator
+Bundle-SymbolicName: org.uml2abap.umap;singleton:=true
+Bundle-Version: 0.0.1.qualifier
+Bundle-Activator: org.uml2abap.umap.Activator
+Bundle-Vendor: Mathias Maerker / Michael Luther
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ocl.ecore,
  org.eclipse.acceleo.engine,
@@ -13,13 +13,13 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6,
  J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
-Export-Package: com.tts.umap;uses:="org.eclipse.core.runtime,org.osgi.framework",
- com.tts.umap.nuggetExport;
+Export-Package: com.tts.umap.nuggetExport;
   uses:="org.eclipse.emf.ecore.resource,
    org.eclipse.emf.ecore,
    org.eclipse.emf.common.util,
    org.eclipse.acceleo.engine.generation.strategy,
    org.eclipse.acceleo.engine.service",
  com.tts.umap.services;uses:="org.eclipse.osgi.util,org.eclipse.uml2.uml",
- com.tts.umap.umapExport
-Import-Package: com.tts.umap
+ com.tts.umap.umapExport,
+ org.uml2abap.umap;uses:="org.eclipse.core.runtime,org.osgi.framework"
+Import-Package: org.uml2abap.umap

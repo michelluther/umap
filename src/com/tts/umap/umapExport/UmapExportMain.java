@@ -35,7 +35,7 @@ public class UmapExportMain extends AbstractAcceleoGenerator {
 	 *
 	 * @generated
 	 */
-	public static final String MODULE_FILE_NAME = "/com/tts/umap/umapExport/umapExportMain";
+	public static final String MODULE_FILE_NAME = "/org/uml2abap/umap/umapExport/umapExportMain";
 	
 	/**
 	 * The name of the templates that are to be generated.

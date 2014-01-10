@@ -3,7 +3,7 @@ package com.tts.umap.services;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "com.tts.umap.services.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.uml2abap.umap.services.messages"; //$NON-NLS-1$
 	public static String Dateformat; 
 	public static String AbapPublic;
 	public static String AbapPrivate;

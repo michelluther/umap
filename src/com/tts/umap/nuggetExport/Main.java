@@ -36,7 +36,7 @@ public class Main extends AbstractAcceleoGenerator {
    *
    * @generated
    */
-  public static final String MODULE_FILE_NAME = "/com/tts/umap/nuggetExport/main";
+  public static final String MODULE_FILE_NAME = "/org/uml2abap/umap/nuggetExport/main";
   
   /**
    * The name of the templates that are to be generated.
