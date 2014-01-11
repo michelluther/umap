@@ -13,13 +13,20 @@ package com.tts.umap.umapExport;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.acceleo.common.preference.AcceleoPreferences;
+import org.eclipse.acceleo.engine.AcceleoEngineMessages;
+import org.eclipse.acceleo.engine.AcceleoEnginePlugin;
 import org.eclipse.acceleo.engine.event.IAcceleoTextGenerationListener;
+import org.eclipse.acceleo.engine.generation.strategy.DoNotGenerateGenerationStrategy;
 import org.eclipse.acceleo.engine.generation.strategy.IAcceleoGenerationStrategy;
 import org.eclipse.acceleo.engine.generation.strategy.PreviewStrategy;
 import org.eclipse.acceleo.engine.service.AbstractAcceleoGenerator;
+import org.eclipse.acceleo.engine.service.AcceleoService;
+import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.BasicMonitor;
 import org.eclipse.emf.common.util.Monitor;
 import org.eclipse.emf.common.util.URI;
@@ -416,7 +423,69 @@ public class UmapExportMain extends AbstractAcceleoGenerator {
 
 	@Override
 	public Map<String, String> generate(Monitor monitor) throws IOException {
-		return super.generate(monitor);
+		boolean notificationsState = false;
+		if (EMFPlugin.IS_ECLIPSE_RUNNING && !AcceleoPreferences.areNotificationsForcedDisabled()) {
+			notificationsState = AcceleoPreferences.areNotificationsEnabled();
+			AcceleoPreferences.switchNotifications(true);
+		}
+		File target = getTargetFolder();
+//		if (!target.exists() && !target.mkdirs()) {
+//			throw new IOException("target directory " + target + " couldn't be created."); //$NON-NLS-1$ //$NON-NLS-2$
+//		}
+		AcceleoService service = createAcceleoService();
+		String[] templateNames = getTemplateNames();
+		Map<String, String> result = new HashMap<String, String>();
+
+		// Start
+		service.doPrepareGeneration(monitor, target);
+
+		acceleoPropertiesLoaderService = getPropertiesLoaderService(service);
+		if (acceleoPropertiesLoaderService != null) {
+			acceleoPropertiesLoaderService.initializeService(getProperties());
+		}
+
+		for (int i = 0; i < templateNames.length; i++) {
+			result.putAll(service.doGenerate(getModule(), templateNames[i], getModel(), getArguments(),
+					target, monitor));
+		}
+
+		// End
+		service.finalizeGeneration();
+
+		postGenerate(getModule().eResource().getResourceSet());
+		originalResources.clear();
+		service.clearCaches();
+
+		if (!service.hasGenerationOccurred()) {
+			if (EMFPlugin.IS_ECLIPSE_RUNNING && AcceleoPreferences.isDebugMessagesEnabled()) {
+				AcceleoEnginePlugin.log(AcceleoEngineMessages
+						.getString("AcceleoService.NoGenerationHasOccurred"), false); //$NON-NLS-1$				
+			} else if (!EMFPlugin.IS_ECLIPSE_RUNNING) {
+				System.err.println(AcceleoEngineMessages.getString("AcceleoService.NoGenerationHasOccurred")); //$NON-NLS-1$
+			}
+		}
+		if (EMFPlugin.IS_ECLIPSE_RUNNING && !AcceleoPreferences.areNotificationsForcedDisabled()) {
+			AcceleoPreferences.switchNotifications(notificationsState);
+		}
+		return result;
+	}
+
+	@Override
+	protected AcceleoService createAcceleoService() {
+		// FIXME Musste �berschrieben werden da die generation sonst schief lief, die Serviceklasse brach ab 
+		// da die PreviewStrategy nicht erkannt wurde auf Bugfix warten
+		IAcceleoGenerationStrategy generationStrategy = getGenerationStrategy();
+		AcceleoService service = new AcceleoService(generationStrategy);
+		for (IAcceleoTextGenerationListener listener : getGenerationListeners()) {
+			service.addListener(listener);
+		}
+		for (IAcceleoTextGenerationListener listener : generationListeners) {
+			service.addListener(listener);
+		}
+
+		service.setGenerationID(generationID);
+
+		return service;
 	}
 
 

@@ -20,11 +20,12 @@
 	</object>
 [/for]
 [for (c : Class | p.ownedElement->filter(Class))]
-[if (isValid(c))]
+[comment if isValid rufen? /]
+
 	<object name="[c.name/]" type="C" isException="[isException(c)/]" description="[c.ownedComment._body/]">
 	[generateClassDefinition(c).toString().trim()/]
 	</object>
-[/if]
+
 
  [/for] 
 </objects>

@@ -1,9 +1,0 @@
-[comment encoding = UTF-8 /]
-[module generateExceptionClass('http://www.eclipse.org/uml2/3.0.0/UML')/]
-[import com::tts::umap::services::abapServices /]
-[import com::tts::umap::nuggetExport::generateClass /]
-
-
-[template public generateExceptionClass(c : Class)? (isValid(c) and isException(c)) post (trim())]
-[generateClass(c)/]
-[/template]
