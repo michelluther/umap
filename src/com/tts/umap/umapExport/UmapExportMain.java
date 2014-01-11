@@ -14,9 +14,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.acceleo.engine.event.IAcceleoTextGenerationListener;
 import org.eclipse.acceleo.engine.generation.strategy.IAcceleoGenerationStrategy;
+import org.eclipse.acceleo.engine.generation.strategy.PreviewStrategy;
 import org.eclipse.acceleo.engine.service.AbstractAcceleoGenerator;
 import org.eclipse.emf.common.util.BasicMonitor;
 import org.eclipse.emf.common.util.Monitor;
@@ -35,7 +37,7 @@ public class UmapExportMain extends AbstractAcceleoGenerator {
 	 *
 	 * @generated
 	 */
-	public static final String MODULE_FILE_NAME = "/org/uml2abap/umap/umapExport/umapExportMain";
+	public static final String MODULE_FILE_NAME = "/com/tts/umap/umapExport/umapExportMain";
 	
 	/**
 	 * The name of the templates that are to be generated.
@@ -239,11 +241,11 @@ public class UmapExportMain extends AbstractAcceleoGenerator {
 	 * </p>
 	 * 
 	 * @return The generation strategy that is to be used for generations launched through this launcher.
-	 * @generated
+	 * @generated NOT 
 	 */
 	@Override
   public IAcceleoGenerationStrategy getGenerationStrategy() {
-        return super.getGenerationStrategy();
+        return new PreviewStrategy();
     }
 	
 	/**
@@ -411,5 +413,12 @@ public class UmapExportMain extends AbstractAcceleoGenerator {
         
         // resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(UMLResource.FILE_EXTENSION, UMLResource.Factory.INSTANCE);
     }
+
+	@Override
+	public Map<String, String> generate(Monitor monitor) throws IOException {
+		return super.generate(monitor);
+	}
+
+
 	
 }
