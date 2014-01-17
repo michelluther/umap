@@ -29,5 +29,5 @@
   	<version>0.0.1-SNAPSHOT</version>
   	<relativePath>../../../eclipseJ2EE/Luna SDK/luna sdk ws/org.uml2abap.adt.releng</relativePath>
   </parent>
-  <packaging>pom</packaging>
+  <packaging>eclipse-plugin</packaging>
 </project>

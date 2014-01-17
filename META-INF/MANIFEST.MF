@@ -22,4 +22,3 @@ Export-Package: com.tts.umap.umapExport;
  com.tts.umap.services;uses:="org.eclipse.osgi.util,org.eclipse.uml2.uml",
  com.tts.umap.umapExport,
  org.uml2abap.umap;uses:="org.eclipse.core.runtime,org.osgi.framework"
-Import-Package: org.uml2abap.umap
