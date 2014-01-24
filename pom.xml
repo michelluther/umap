@@ -21,8 +21,9 @@
           <target>1.6</target>
         </configuration>
       </plugin>
-    </plugins>
+      </plugins>
   </build>
+  
   <parent>
   	<groupId>umap_adt</groupId>
   	<artifactId>org.uml2abap.adt.releng</artifactId>

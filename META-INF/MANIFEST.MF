@@ -13,12 +13,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6,
  J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
-Export-Package: com.tts.umap.umapExport;
+Export-Package: com.tts.umap.services;uses:="org.eclipse.osgi.util,org.eclipse.uml2.uml",
+ com.tts.umap.umapExport;
   uses:="org.eclipse.emf.ecore.resource,
    org.eclipse.emf.ecore,
    org.eclipse.emf.common.util,
    org.eclipse.acceleo.engine.generation.strategy,
    org.eclipse.acceleo.engine.service",
- com.tts.umap.services;uses:="org.eclipse.osgi.util,org.eclipse.uml2.uml",
- com.tts.umap.umapExport,
  org.uml2abap.umap;uses:="org.eclipse.core.runtime,org.osgi.framework"
