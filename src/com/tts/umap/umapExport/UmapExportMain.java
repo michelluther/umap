@@ -12,26 +12,36 @@ package com.tts.umap.umapExport;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.acceleo.common.IAcceleoConstants;
+import org.eclipse.acceleo.common.internal.utils.AcceleoPackageRegistry;
 import org.eclipse.acceleo.common.preference.AcceleoPreferences;
+import org.eclipse.acceleo.common.utils.ModelUtils;
 import org.eclipse.acceleo.engine.AcceleoEngineMessages;
 import org.eclipse.acceleo.engine.AcceleoEnginePlugin;
 import org.eclipse.acceleo.engine.event.IAcceleoTextGenerationListener;
-import org.eclipse.acceleo.engine.generation.strategy.DoNotGenerateGenerationStrategy;
 import org.eclipse.acceleo.engine.generation.strategy.IAcceleoGenerationStrategy;
 import org.eclipse.acceleo.engine.generation.strategy.PreviewStrategy;
 import org.eclipse.acceleo.engine.service.AbstractAcceleoGenerator;
 import org.eclipse.acceleo.engine.service.AcceleoService;
+import org.eclipse.acceleo.model.mtl.Module;
+import org.eclipse.acceleo.model.mtl.resource.AcceleoResourceSetImpl;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.BasicMonitor;
 import org.eclipse.emf.common.util.Monitor;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.URIConverter;
+import org.uml2abap.umap.Activator;
 
 /**
  * Entry point of the 'UmapExportMain' generation module.
@@ -486,6 +496,76 @@ public class UmapExportMain extends AbstractAcceleoGenerator {
 		service.setGenerationID(generationID);
 
 		return service;
+	}
+
+	@Override
+	public void initialize(URI modelURI, File folder, List<?> arguments)
+			throws IOException {
+		ResourceSet modulesResourceSet = new AcceleoResourceSetImpl();
+		modulesResourceSet.setPackageRegistry(AcceleoPackageRegistry.INSTANCE);
+		
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "Next call URIConverter"));
+		URIConverter uriConverter = createURIConverter();
+		if (uriConverter != null) {
+			modulesResourceSet.setURIConverter(uriConverter);
+		}
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "Next after URIConverter"));
+		Map<URI, URI> uriMap = EcorePlugin.computePlatformURIMap();
+
+		// make sure that metamodel projects in the workspace override those in plugins
+		modulesResourceSet.getURIConverter().getURIMap().putAll(uriMap);
+
+		registerResourceFactories(modulesResourceSet);
+		registerPackages(modulesResourceSet);
+
+		ResourceSet modelResourceSet = new AcceleoResourceSetImpl();
+		modelResourceSet.setPackageRegistry(AcceleoPackageRegistry.INSTANCE);
+		if (uriConverter != null) {
+			modelResourceSet.setURIConverter(uriConverter);
+		}
+
+		// make sure that metamodel projects in the workspace override those in plugins
+		modelResourceSet.getURIConverter().getURIMap().putAll(uriMap);
+
+		registerResourceFactories(modelResourceSet);
+		registerPackages(modelResourceSet);
+
+		addListeners();
+		addProperties();
+
+		String moduleName = getModuleName();
+		if (moduleName.endsWith('.' + IAcceleoConstants.MTL_FILE_EXTENSION)) {
+			moduleName = moduleName.substring(0, moduleName.lastIndexOf('.'));
+		}
+		if (!moduleName.endsWith('.' + IAcceleoConstants.EMTL_FILE_EXTENSION)) {
+			moduleName += '.' + IAcceleoConstants.EMTL_FILE_EXTENSION;
+		}
+
+		URL moduleURL = findModuleURL(moduleName);
+
+		if (moduleURL == null) {
+			throw new IOException("'" + getModuleName() + ".emtl' not found"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "Next call MODULE URI"));
+		System.err.println(moduleURL.toString());
+		URI moduleURI = createTemplateURI(moduleURL.toString());
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "Next call createURI"));
+		moduleURI = URI.createURI(moduleURI.toString(), true);
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "Next call modelutils.load"));
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "moduleUri= " + moduleURI.toString()));
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "ressourceSet= " + modulesResourceSet.toString()));
+		module = (Module)ModelUtils.load(moduleURI, modulesResourceSet);
+		
+		
+		
+		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "Next call Model URI"));
+		URI newModelURI = URI.createURI(modelURI.toString(), true);
+		model = ModelUtils.load(newModelURI, modelResourceSet);
+		targetFolder = folder;
+		generationArguments = arguments;
+
+		this.postInitialize();
 	}
 
 
